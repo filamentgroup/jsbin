@@ -80,9 +80,6 @@
     "hbs-utils": "0.0.3",
     "mocha": "~1.21.4"
   },
-  "optionalDependencies": {
-    "zmq": "~2.6.0"
-  },
   "engines": {
     "node": ">=0.10.* <0.12"
   },
