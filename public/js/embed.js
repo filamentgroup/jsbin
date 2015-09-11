@@ -274,6 +274,10 @@
     }
   }
 
+  window.jsbin = window.jsbin || {
+    readLink: readLinks
+  };
+
   var docElem = document && document.documentElement;
 
   function viewportW() {
