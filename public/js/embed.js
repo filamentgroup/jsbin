@@ -275,7 +275,7 @@
   }
 
   window.jsbin = window.jsbin || {
-    readLink: readLinks
+    readLinks: readLinks
   };
 
   var docElem = document && document.documentElement;
