@@ -19,6 +19,32 @@ CLEARDB_DATABASE_URL: mysql://$USERNAME:$PASS@$HOST/heroku_$DB_NUMBER?reconnect=
 $ mysql --host=$HOST --user=$USERNAME --password=$PASS --reconnect heroku_$DB_NUMBER < build/full-db-v3.mysql.sql
 ```
 
+### API Key
+
+If you are using the `bin.js` documentation plugin you'll also need to set the API Key in the app and also in the `bin.js` file.
+
+On Linux:
+
+```bash
+$ heroku config:set --app $INSTANCE_NAME JSBIN_API_KEYS=$(echo "something super secret" | md5sum)
+```
+
+On OS X
+```
+$ heroku config:set --app $INSTANCE_NAME JSBIN_API_KEYS=$(echo "something super secret" | md5)
+```
+
+Where `something super secret` should be replaced by something super secrete. Note, that we're not overly concerned with security here.
+
+Then in the `bin.js` file find the following and place the configured host and `JSBIN_API_KEYS` values appropriately.
+
+```js
+...
+Bin.urlRoot = "http://$INSTANCE_NAME.herokuapp.com";
+Bin.apiKey = "$MD5";
+...
+```
+
 ## If you use JS Bin locally...
 
 It likely means you're not going to subscribe as a pro user - which is how we're sustaining our project, which is cool, but [please consider donating via Gratipay here](https://gratipay.com/jsbin/).
