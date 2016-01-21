@@ -1,6 +1,23 @@
-# JS Bin
+# JS Bin - FG edition
 
 JS Bin is an open source collaborative web development debugging tool.
+
+## Creating a New Heroku App
+
+To create a new application issue the following commands:
+
+``` bash
+$ heroku fork --from jsbin-template --to <instance name>
+$ heroku config:set HOSTNAME=<instance name>.herokuapp.com
+$ heroku config
+=== jsbin-template Config Vars
+CLEARDB_DATABASE_URL: mysql://<username>:<pass>@<host>/heroku_<db number>?reconnect=true
+...
+
+# consult the CLEARDB_DATABASE_URL for the information in the following command
+# this will create the database schema that jsbin uses to store bin info
+$ mysql --host=<host> --user=<username> --password=<pass> --reconnect heroku_<db number> < build/full-db-v3.mysql.sql
+```
 
 ## If you use JS Bin locally...
 
