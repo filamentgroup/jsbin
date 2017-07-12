@@ -2,7 +2,7 @@
  * JS Bin Runner
  * Accepts incoming postMessage events and updates a live iframe accordingly.
  * ========================================================================== */
-
+/*globals sandbox loopProtect window alert */
 var runner = (function () {
   'use strict';
   var runner = {};
@@ -28,7 +28,7 @@ var runner = (function () {
   runner.error = function () {
     var args = ['Runner:'].concat([].slice.call(arguments));
     if (!('console' in window)) {return alert(args.join(' '));}
-    window.console.error.apply(console, args);
+    //window.console.error.apply(console, args);
   };
 
   /**
@@ -38,7 +38,7 @@ var runner = (function () {
     if (!event.origin) {return;}
     var data = event.data;
     try {
-      data = JSON.parse(event.data);
+      data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
     } catch (e) {
       return runner.error('Error parsing event data:', e.message);
     }
@@ -112,7 +112,7 @@ var runner = (function () {
       // childDoc.write) can access the objects.
       childWindow.runnerWindow = {
         proxyConsole: proxyConsole,
-        protect: loopProtect.protect
+        protect: loopProtect,
       };
 
       childWindow.console = proxyConsole;
@@ -132,6 +132,7 @@ var runner = (function () {
       // why the source is rendered above (processor.render) – it should be one
       // string. IE's a sensitive soul.
       childDoc.write(source);
+      // childDoc.documentElement.innerHTML = source;
 
       // Close the document. This will fire another DOMContentLoaded.
       childDoc.close();

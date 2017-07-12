@@ -1,0 +1,5 @@
+document.getElementById('bsaapi').innerHTML = '<a href="{{ad.statlink}}" target="_blank">{{ad.title}}: {{ad.description}}</a>{{#each imgs}}{{{.}}}{{/each}}';
+{{#if ad.description}}$('body').addClass('bsaapi');{{/if}}
+$('#bsaapi a').click(function () {
+  jsbin.analytics.track('ad', 'click', 'bsa');
+});

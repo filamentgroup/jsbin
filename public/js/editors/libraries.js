@@ -5,8 +5,18 @@ var libraries = [
     'group': 'jQuery'
   },
   {
-    'url': 'https://code.jquery.com/jquery-3.0.0-alpha1.js',
-    'label': 'jQuery 3.0.0-alpha1',
+    'url': 'https://code.jquery.com/jquery-3.1.0.js',
+    'label': 'jQuery 3.1.0',
+    'group': 'jQuery'
+  },
+  {
+    'url': 'https://code.jquery.com/jquery-3.0.0.js',
+    'label': 'jQuery 3.0.0',
+    'group': 'jQuery'
+  },
+  {
+    'url': 'https://code.jquery.com/jquery-2.2.4.js',
+    'label': 'jQuery 2.2.4',
     'group': 'jQuery'
   },
   {
@@ -15,18 +25,23 @@ var libraries = [
     'group': 'jQuery'
   },
   {
-    'url': 'https://code.jquery.com/jquery-compat-git.js',
-    'label': 'jQuery Compat WIP (via git)',
+    'url': 'https://code.jquery.com/jquery-2.0.3.js',
+    'label': 'jQuery 2.0.3',
     'group': 'jQuery'
   },
   {
-    'url': 'https://code.jquery.com/jquery-compat-3.0.0-alpha1.js',
-    'label': 'jQuery Compat 3.0.0-alpha1',
+    'url': 'https://code.jquery.com/jquery-1.12.4.js',
+    'label': 'jQuery 1.12.4',
     'group': 'jQuery'
   },
   {
     'url': 'https://code.jquery.com/jquery-1.11.3.js',
     'label': 'jQuery 1.11.3',
+    'group': 'jQuery'
+  },
+  {
+    'url': 'https://code.jquery.com/jquery-1.10.2.js',
+    'label': 'jQuery 1.10.2',
     'group': 'jQuery'
   },
   {
@@ -60,8 +75,17 @@ var libraries = [
   },
   {
     'url': [
+      'https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css',
+      'https://code.jquery.com/jquery-3.1.0.js',
+      'https://code.jquery.com/ui/1.12.1/jquery-ui.js'
+    ],
+    'label': 'jQuery UI 1.12.1',
+    'group': 'jQuery UI'
+  },
+  {
+    'url': [
       'https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css',
-      'https://code.jquery.com/jquery-1.11.3.js',
+      'https://code.jquery.com/jquery-1.12.4.js',
       'https://code.jquery.com/ui/1.11.4/jquery-ui.js'
     ],
     'label': 'jQuery UI 1.11.4',
@@ -133,8 +157,8 @@ var libraries = [
   {
     'url': [
       'https://code.jquery.com/jquery.min.js',
-      'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css',
-      'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'
+      'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css',
+      'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js'
     ],
     'label': 'Bootstrap Latest',
     'group': 'Bootstrap'
@@ -354,12 +378,32 @@ var libraries = [
     'group': 'Angular'
   },
   {
-    'url': '//fb.me/react-0.13.3.js',
+    'url': ['https://fb.me/react-15.1.0.js', 'https://fb.me/react-dom-15.1.0.js'],
+    'label': 'React + React DOM 15.1.0',
+    'group': 'React'
+  },
+  {
+    'url': ['https://fb.me/react-with-addons-15.1.0.js', 'https://fb.me/react-dom-15.1.0.js'],
+    'label': 'React with Add-Ons + React DOM 15.1.0',
+    'group': 'React'
+  },
+  {
+    'url': ['https://fb.me/react-0.14.7.js', 'https://fb.me/react-dom-0.14.7.js'],
+    'label': 'React + React DOM 0.14.7',
+    'group': 'React'
+  },
+  {
+    'url': ['https://fb.me/react-with-addons-0.14.7.js', 'https://fb.me/react-dom-0.14.7.js'],
+    'label': 'React with Add-Ons + React DOM 0.14.7',
+    'group': 'React'
+  },
+  {
+    'url': 'https://fb.me/react-0.13.3.js',
     'label': 'React 0.13.3',
     'group': 'React'
   },
   {
-    'url': '//fb.me/react-with-addons-0.13.3.js',
+    'url': 'https://fb.me/react-with-addons-0.13.3.js',
     'label': 'React with Add-Ons 0.13.3',
     'group': 'React'
   },
@@ -374,8 +418,20 @@ var libraries = [
     'group': 'shims'
   },
   {
-    'url': 'http://vuejs.org/js/vue.js',
-    'label': 'Vue.js',
+    'url': 'https://cdnjs.cloudflare.com/ajax/libs/blissfuljs/1.0.2/bliss.min.js',
+    'label': 'Bliss 1.0.2',
+  },
+  {
+    'url': 'https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.16/vue.js',
+    'label': 'Vue.js 1.0.16',
+  },
+  {
+    'url': 'https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.3/vue.js',
+    'label': 'Vue.js 2.0.3',
+  },
+  {
+    'url': 'http://cdn.ractivejs.org/latest/ractive.js',
+    'label': 'Ractive.js'
   },
   {
     'url': [
@@ -499,8 +555,19 @@ var libraries = [
     'label': 'Less 1.3.3'
   },
   {
-    'url': 'https://cdn.rawgit.com/lodash/lodash/3.0.1/lodash.min.js',
-    'label': 'lodash 3.0.1'
+    'url': 'https://cdn.jsdelivr.net/lodash/4/lodash.min.js',
+    'label': 'lodash 4.x',
+    'group': 'Lodash'
+  },
+  {
+    'url': 'https://cdn.jsdelivr.net/g/lodash@4(lodash.min.js+lodash.fp.min.js)',
+    'label': 'lodash fp 4.x',
+    'group': 'Lodash'
+  },
+  {
+    'url': 'https://cdn.jsdelivr.net/lodash/3/lodash.min.js',
+    'label': 'lodash 3.x',
+    'group': 'Lodash'
   },
   {
     'url': 'http://modernizr.com/downloads/modernizr-latest.js',
@@ -522,8 +589,14 @@ var libraries = [
     'label': 'Processing 1.4.1'
   },
   {
-    'url': 'http://d3js.org/d3.v3.min.js',
-    'label': 'D3 3.x'
+    'url': 'https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.3/d3.min.js',
+    'label': 'D3 4.2.3',
+    'group': 'D3'
+  },
+  {
+    'url': 'https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js',
+    'label': 'D3 3.5.6',
+    'group': 'D3'
   },
   {
     'url': '//code.highcharts.com/highcharts.js',
@@ -574,9 +647,9 @@ var libraries = [
   },
   {
     'url':[
-      'https://cdnjs.cloudflare.com/ajax/libs/three.js/r67/three.min.js'
+      'https://cdnjs.cloudflare.com/ajax/libs/three.js/r82/three.min.js'
     ],
-    'label': 'Three.js r67'
+    'label': 'Three.js r82'
   },
   {
     'url':[
@@ -592,6 +665,14 @@ var libraries = [
     'label': 'Polymer 0.3.3'
   },
   {
+    'url':[
+      'https://code.getmdl.io/1.2.1/material.indigo-pink.min.css',
+      'https://code.getmdl.io/1.2.1/material.min.js',
+      'https://fonts.googleapis.com/icon?family=Material+Icons'
+      ],
+    'label': 'Material Design Lite 1.2.1'
+  },
+  {
     'url': '//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css',
     'label': 'Font Awesome 4.0.3'
   },
@@ -603,10 +684,10 @@ var libraries = [
     'url': {
       'url': 'https://openui5.hana.ondemand.com/resources/sap-ui-core.js',
       'id': 'sap-ui-bootstrap',
-      'data-sap-ui-theme': 'sap_bluecrystal',
+      'data-sap-ui-theme': 'sap_belize',
       'data-sap-ui-libs': 'sap.m'
     },
-    'label': 'OpenUI5 latest (Mobile BlueCrystal)'
+    'label': 'OpenUI5 CDN (belize Theme, mobile library)'
   },
   {
     'url': 'https://cdnjs.cloudflare.com/ajax/libs/gsap/1.11.7/TweenMax.min.js',
@@ -618,10 +699,10 @@ var libraries = [
   },
   {
     'url': [
-      '//vjs.zencdn.net/4.12/video-js.css',
-      '//vjs.zencdn.net/4.12/video.js'
+      '//vjs.zencdn.net/5.11/video-js.css',
+      '//vjs.zencdn.net/5.11/video.js'
     ],
-    'label': 'Video.js 4.12.x'
+    'label': 'Video.js 5.11.x'
   },
   {
     'url': [
@@ -648,18 +729,39 @@ var libraries = [
     'label': 'OpenTok v2.x (latest)'
   },
   {
-    'url': 'https://cdnjs.cloudflare.com/ajax/libs/rxjs/2.3.22/rx.all.js',
-    'label': 'rx.all',
+    'url': 'https://cdn.jsdelivr.net/riot/2.6/riot+compiler.min.js',
+    'label': 'Riot + Compiler (latest 2.6.x)'
+  },
+  {
+    'url': [
+      'https://unpkg.com/blaze/dist/blaze.min.css',
+      'https://unpkg.com/blaze/dist/blaze.colors.min.css'
+    ],
+    'label': 'Blaze CSS (latest)'
+  },
+  {
+    'url': 'https://unpkg.com/@reactivex/rxjs@5.0.3/dist/global/Rx.js',
+    'label': 'RxJS 5.0.3',
     'group': 'RxJS'
   },
   {
-    'url': 'https://cdnjs.cloudflare.com/ajax/libs/rxjs/2.3.22/rx.testing.js',
-    'label': 'rx.testing',
+    'url': 'https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.0.6/rx.all.js',
+    'label': 'rx.all 4.0.6',
     'group': 'RxJS'
   },
   {
-    'url': 'https://cdnjs.cloudflare.com/ajax/libs/rxjs-dom/2.0.7/rx.dom.js',
-    'label': 'rx.dom',
+    'url': 'https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.0.6/rx.all.compat.js',
+    'label': 'rx.all.compat 4.0.6',
+    'group': 'RxJS'
+  },
+  {
+    'url': 'https://cdnjs.cloudflare.com/ajax/libs/rxjs/4.0.6/rx.testing.js',
+    'label': 'rx.testing 4.0.6',
+    'group': 'RxJS'
+  },
+  {
+    'url': 'https://unpkg.com/rx-dom@7.0.3/dist/rx.dom.js',
+    'label': 'rx.dom 7.0.3 (requires 4.x)',
     'group': 'RxJS'
   },
   {
@@ -683,8 +785,43 @@ var libraries = [
     'group': 'Data structures'
   },
   {
-    'url': 'https://cdn.jsdelivr.net/ramda/0.15.1/ramda.min.js',
-    'label': 'Ramda 0.15.1'
+    'url': 'https://cdnjs.cloudflare.com/ajax/libs/ramda/0.22.1/ramda.min.js',
+    'label': 'Ramda 0.22.1'
+  },
+  {
+    'url': [
+      'https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.css',
+      'https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.2/semantic.min.js'
+    ],
+    'label': 'Semantic UI 2.2.2'
+  },
+  {
+    'url': 'https://cdn.jsdelivr.net/pouchdb/latest/pouchdb.min.js',
+    'label': 'PouchDB (latest)',
+    'group': 'PouchDB'
+  },
+  {
+    'url': 'https://cdn.jsdelivr.net/momentjs/2.14.1/moment-with-locales.min.js',
+    'label': 'Moment 2.14.1',
+    'group': 'Moment.js'
+  },
+  {
+    'url': [
+      'https://cdn.jsdelivr.net/momentjs/2.14.1/moment-with-locales.min.js',
+      'https://cdn.jsdelivr.net/momentjs/2.14.1/locales.min.js'
+    ],
+    'label': 'Moment 2.14.1 (with locales)',
+    'group': 'Moment.js'
+  },
+  {
+    'url': '//cdn.jsdelivr.net/velocity/1.2.3/velocity.min.js',
+    'label': 'Velocity JS 1.2.3',
+    'group': 'Velocity'
+  },
+  {
+    'url': '//cdn.jsdelivr.net/velocity/1.2.3/velocity.ui.min.js',
+    'label': 'Velocity UI Pack 1.2.3',
+    'group': 'Velocity'
   }
 ];
 

@@ -1,4 +1,4 @@
-/*globals jsbin, _, $, RSVP, renderLivePreview, editors, throttle, debounceAsync, hintingDone, CodeMirror, Panel, editorModes */
+/*globals jsbin, _$, RSVP, renderLivePreview, editors, throttle, debounceAsync, hintingDone, CodeMirror, Panel, editorModes */
 var processors = jsbin.processors = (function () {
   'use strict';
   /*
@@ -13,7 +13,7 @@ var processors = jsbin.processors = (function () {
    * Add properties to a function using underscore
    */
   var extendFn = function (fn, obj) {
-    return _.extend(fn, obj);
+    return $.extend(fn, obj);
   };
 
   var passthrough = function (ready) { return ready(); };
@@ -27,7 +27,7 @@ var processors = jsbin.processors = (function () {
    * Cache extension ids by their file extensions
    */
   var processorBy = {
-    extension: {}
+    extension: {},
   };
 
   /**
@@ -42,6 +42,15 @@ var processors = jsbin.processors = (function () {
       success: callback
     });
   };
+
+  function pick() {
+    var args = [].slice.call(arguments, 0);
+    var target = args.shift();
+    return args.reduce(function (acc, curr) {
+      acc[curr] = target[curr] || null;
+      return acc;
+    }, {});
+  }
 
   /**
    * Create a processor – accepts an object containing:
@@ -60,7 +69,7 @@ var processors = jsbin.processors = (function () {
     var url = opts.url,
         init = opts.init || passthrough,
         handler = opts.handler || defaultProcessor,
-        processorData = _.pick(opts, 'id', 'target', 'extensions');
+        processorData = pick(opts, 'id', 'target', 'extensions');
 
     opts.extensions = opts.extensions || [];
     if (!opts.extensions.length) {
@@ -247,7 +256,7 @@ var processors = jsbin.processors = (function () {
 
           reject([errors]);
         }
-      }
+      },
     }),
 
     typescript: createProcessor({
@@ -257,48 +266,38 @@ var processors = jsbin.processors = (function () {
       url: jsbin.static + '/js/vendor/typescript.min.js',
       init: passthrough,
       handler: function typescript(source, resolve, reject) {
-        var noop = function () {};
-        var outfile = {
-          source: '',
-          Write: function (s) {
-            this.source += s;
+
+        var result = ts.transpileModule(source, {
+          compilerOptions: {
+            inlineSourceMap: true,
+            inlineSources: true,
+            target: ts.ScriptTarget.ES5
           },
-          WriteLine: function (s) {
-            this.source += s + '\n';
-          },
-          Close: noop
-        };
-
-        var outerr = {
-          Write: noop,
-          WriteLine: noop,
-          Close: noop
-        };
-
-        var parseErrors = [];
-
-        var compiler = new window.TypeScript.TypeScriptCompiler(outfile, outerr);
-
-        compiler.setErrorCallback(function (start, len, message) {
-          parseErrors.push({ start: start, len: len, message: message });
+          fileName: 'jsbin.ts',
+          reportDiagnostics: true
         });
-        compiler.parser.errorRecovery = true;
 
-        compiler.addUnit(source, 'jsbin.ts');
-        compiler.typeCheck();
-        compiler.reTypeCheck();
-        compiler.emit();
+        /**
+         *  TypeScript is complaining about the `isolateModules` setting, which
+         *  is meant to ignore import statements. We don't want to show that to
+         *  the user, so we just filter it out.
+         */
+        var diagnostics = result.diagnostics.filter(function(error){
+          return error.code !== 5047;
+        });
 
-        for (var i = 0, len = parseErrors.length; i < len; i++) {
-          console.log('Error Message: ' + parseErrors[i].message);
-          console.log('Error Start: ' + parseErrors[i].start);
-          console.log('Error Length: ' + parseErrors[i].len);
-        }
-
-        if (parseErrors.length) {
-          reject();
+        if (diagnostics.length) {
+          reject(diagnostics.map(function(diagnostic){
+            var position  = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
+            var line = position.line + 1;
+            var character = position.character + 1;
+            var message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+            var code = source.substr(diagnostic.start, diagnostic.length);
+            return message + (code ? ' at ' + code : '') +
+              ' (' + diagnostic.file.fileName + ':'+line+':'+character+')';
+          }).join('\n'));
         } else {
-          resolve(outfile.source);
+          resolve(result.outputText);
         }
       }
     }),
@@ -585,50 +584,81 @@ var processors = jsbin.processors = (function () {
 
     clojurescript: (function() {
 
-      var worker, resolveWorker, rejectWorker, initReady;
+      var worker, resolveWorker;
 
-      /* do stuff after worker has finished setup */
-      function workerReady(event) {
-        if (event.data.name === 'ready') {
-          worker.removeEventListener('message', workerReady, false);
-          getScript(jsbin.static + '/js/vendor/codemirror5/mode/clojure/clojure.js', initReady);
-        }
+      function workerMsgHandler() {
+        window.addEventListener('message', function(event) {
+          var message;
+          try {
+            message = JSON.parse(event.data);
+          } catch (e) {
+            return;
+          }
+
+          if (message.type === 'eval') {
+            jsbin_cljs.core.eval(
+              '(ns cljs.user)' + message.source,
+              function(err, result) {
+                cljs.user = null;
+                if (err) {
+                  throw Error(err);
+                } else {
+                  parent.postMessage(JSON.stringify({
+                    type: 'eval',
+                    result: result
+                  }), '*');
+                }
+              });
+          }
+        }, false);
       }
 
-      /* get result of evaluation
-       * and wrap with quotes to prevent attempt to eval a string */
-      function workerEval(event) {
-        if (event.data.name === 'eval') {
-          worker.removeEventListener('message', workerEval, false);
-          resolveWorker(event.data.result);
+      window.addEventListener('message', function(event) {
+        try {
+          var message = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+
+          if (message.type === 'eval') {
+            resolveWorker('console.log('+JSON.stringify(message.result)+')');
+          }
+        } catch (e) {
+          // toss errors
         }
-      }
+      }, false);
 
       return createProcessor({
         id: 'clojurescript',
         target: 'js',
         extensions: ['clj', 'cljs'],
+        url: jsbin.static + '/js/vendor/cljs.js',
         init: function clojurescript(ready) {
 
-          // init worker
-          if (window.Worker) {
-            initReady = ready;
-            worker = new Worker(jsbin.static + '/js/workers/cljs-worker.js');
-            worker.addEventListener('error', rejectWorker, false);
-            worker.addEventListener('message', workerReady, false);
-            worker.postMessage({ name: 'cljs', path: jsbin.static + '/js/vendor/cljs.js' });
-          } else {
-            alert('Web Workers API is not supported http://caniuse.com/#feat=webworkers');
-          }
+          /* Create sandbox */
+          worker = document.createElement('iframe');
+          worker.sandbox = 'allow-same-origin allow-scripts';
+          worker.name = '<cljs>';
+
+          worker.onload = function() {
+            /* Init CLJS context */
+            worker.contentWindow.jsbin_cljs = jsbin_cljs;
+            worker.contentWindow.cljs = cljs;
+            worker.contentWindow.goog = goog;
+
+            var initilizer = worker.contentWindow.document.createElement('script')
+            initilizer.textContent = '('+workerMsgHandler.toString().split('\n').join('')+')()';
+            worker.contentWindow.document.body.appendChild(initilizer);
+
+            getScript(jsbin.static + '/js/vendor/codemirror5/mode/clojure/clojure.js', ready);
+          };
+
+          document.body.appendChild(worker);
         },
         handler: function (source, resolve, reject) {
           try {
-            /* send code to worker
-             * and alias promise functions to be used in upper scope */
             resolveWorker = resolve;
-            rejectWorker = reject;
-            worker.addEventListener('message', workerEval, false);
-            worker.postMessage({ name: 'eval', code: source });
+            worker.contentWindow.postMessage(JSON.stringify({
+              type: 'eval',
+              source: source
+            }), '*');
           } catch (e) {
             console.error(e);
           }
@@ -721,7 +751,7 @@ var processors = jsbin.processors = (function () {
           labelData = $(this).data('label');
       if (target !== 'convert') {
         $panelButton.html(labelData || label);
-        $label.text(label);
+        $label.html('<span>' + label + '</span>');
         if (target === panelId) {
           jsbin.processors.reset(panelId);
           render();
@@ -740,7 +770,7 @@ var processors = jsbin.processors = (function () {
       if (value === this.hash.substring(1)) {
         var $panelButton = $panelButtons.find('a[href$="' + panelId + '"]');
         var $this = $(this);
-        $label.text($this.text());
+        $label.html('<span>' + $this.text() + '</span>');
         $panelButton.html($this.data('label') || $this.text());
       }
     });

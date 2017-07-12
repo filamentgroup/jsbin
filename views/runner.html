@@ -1,4 +1,5 @@
 <!doctype html>
+<html>
 <meta charset=utf-8>
 <title>JS Bin Runner</title>
 
@@ -19,9 +20,13 @@
     width: 100%;
   }
 </style>
-
 <div id="sandbox-wrapper"></div>
 {{#if settings.is_production}}
+  <script>
+  if ('serviceWorker' in navigator && location.origin.indexOf('null') !== -1) {
+    navigator.serviceWorker.register('{{root}}/sw-runner.js', { scope: '/' });
+  }
+  </script>
   <script src="{{static}}/js/prod/runner-{{settings.version}}.min.js"></script>
   {{{analytics}}}
 {{else}}

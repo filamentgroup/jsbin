@@ -145,14 +145,15 @@ var getPreparedCode = (function () { // jshint ignore:line
         js = 'try {' + js + '\n} catch (error) { throw error; }';
       }
 
+      loopProtect.alias = 'window.runnerWindow.protect';
+
       // Rewrite loops to detect infiniteness.
       // This is done by rewriting the for/while/do loops to perform a check at
       // the start of each iteration.
-      js = loopProtect.rewriteLoops(js);
+      js = loopProtect(js);
 
       // escape any script tags in the JS code, because that'll break the mushing together
       js = js.replace(re.script, '<\\/script');
-
 
       // redirect console logged to our custom log while debugging
       if (re.console.test(js)) {
@@ -165,9 +166,9 @@ var getPreparedCode = (function () { // jshint ignore:line
         });
       }
 
-      // note that I'm using split and reconcat instead of replace, because if the js var
-      // contains '$$' it's replaced to '$' - thus breaking Prototype code. This method
-      // gets around the problem.
+      // note that I'm using split and reconcat instead of replace, because if
+      // the js var contains '$$' it's replaced to '$' - thus breaking Prototype
+      // code. This method gets around the problem.
       if (!hasHTML && hasJS) {
         html = '<pre>\n' + js.replace(/[<>&]/g, function (m) {
           return escapeMap[m];
@@ -184,8 +185,6 @@ var getPreparedCode = (function () { // jshint ignore:line
           close = parts.length === 2 && parts[1] ? parts[1] : '';
         }
 
-        // RS: not sure why I ran this in closure, but it means the expected globals are no longer so
-        // js = "window.onload = function(){" + js + "\n}\n";
         var type = jsbin.panels.panels.javascript.type ? ' type="text/' + jsbin.panels.panels.javascript.type + '"' : '';
 
         js += '\n\n//# sourceURL=' + jsbin.state.code + '.js';

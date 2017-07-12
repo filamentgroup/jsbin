@@ -1,5 +1,4 @@
 /*globals $, CodeMirror, jsbin, jshintEnabled, RSVP */
-
 var $document = $(document),
     $source = $('#source'),
     userResizeable = !$('html').hasClass('layout');
@@ -41,13 +40,16 @@ var simpleJsHint = function(cm) {
     return CodeMirror.simpleHint(cm, CodeMirror.hint.javascript);
   }
 };
+
 CodeMirror.commands.autocomplete = simpleJsHint;
 
 CodeMirror.commands.snippets = function (cm) {
   'use strict';
   if (['htmlmixed', 'javascript', 'css', editorModes['less'], editorModes['sass'], editorModes['scss']].indexOf(cm.options.mode) === -1) {
     return CodeMirror.simpleHint(cm, CodeMirror.hint.anyword);
-  } else {
+  } else if (oldCodeMirror) {
+    return oldCodeMirror.snippets(cm);
+  } else if (!jsbin.mobile) {
     return CodeMirror.snippets(cm);
   }
 };
@@ -96,7 +98,7 @@ var Panel = function (name, settings) {
       readOnly: jsbin.state.embed ? 'nocursor' : false,
       dragDrop: false, // we handle it ourselves
       mode: editorModes[panelLanguage],
-      lineWrapping: true,
+      lineWrapping: false,
       // gutters: ['line-highlight'],
       theme: jsbin.settings.theme || 'jsbin',
       highlightLine: true
@@ -114,11 +116,14 @@ var Panel = function (name, settings) {
       cmSettings.extraKeys.Tab = 'snippets';
     }
 
-    // some emmet "stuff" - TODO decide whether this is needed still...
-    $.extend(cmSettings, {
-      syntax: name,   /* define Zen Coding syntax */
-      profile: name   /* define Zen Coding output profile */
-    });
+
+    if (name === 'html') {
+      // some emmet "stuff" - TODO decide whether this is needed still...
+      $.extend(cmSettings, {
+        syntax: name, // define Zen Coding syntax
+        profile: name, // define Zen Coding output profile
+      });
+    }
 
     // make sure tabSize and indentUnit are numbers
     if (typeof cmSettings.tabSize === 'string') {
@@ -129,6 +134,12 @@ var Panel = function (name, settings) {
     }
 
     panel.editor = CodeMirror.fromTextArea(panel.el, cmSettings);
+
+    if (name === 'html' || name === 'css') {
+      delete emmetCodeMirror.defaultKeymap['Cmd-D'];
+      delete emmetCodeMirror.defaultKeymap['Ctrl-D'];
+      emmetCodeMirror(panel.editor);
+    }
 
     panel.editor.on('highlightLines', function () {
       window.location.hash = panels.getHighlightLines();
@@ -207,7 +218,7 @@ var Panel = function (name, settings) {
     this.controlButton = $('<a role="button" class="button group" href="?' + name + '">' + panel.label + '</a>');
     this.updateAriaState();
 
-    this.controlButton.click(function () {
+    this.controlButton.on('click touchstart', function () {
       panel.toggle();
       return false;
     });
@@ -217,9 +228,11 @@ var Panel = function (name, settings) {
   $panel.focus(function () {
     panel.focus();
   });
-  $panel.add(this.$el.find('.label')).click(function () {
-    panel.focus();
-  });
+  if (!jsbin.mobile) {
+    $panel.add(this.$el.find('.label')).click(function () {
+      panel.focus();
+    });
+  }
 };
 
 Panel.order = 0;
@@ -231,6 +244,7 @@ Panel.prototype = {
     this.controlButton.attr('aria-label', this.label + ' Panel: ' + (this.visible ? 'Active' : 'Inactive'));
   },
   show: function show(x) {
+    hideOpen();
     if (this.visible) {
       return;
     }
@@ -243,7 +257,10 @@ Panel.prototype = {
 
     analytics.showPanel(panel.id);
 
-    // panel.$el.show();
+    if (jsbin.mobile) {
+      panels.hideAll(true);
+    }
+
     if (panel.splitter.length) {
       if (panelCount === 0 || panelCount > 1) {
         var $panel = $('.panel.' + panel.id).show();
@@ -266,6 +283,18 @@ Panel.prototype = {
     panel.visible = true;
     this.updateAriaState();
 
+
+    // if the textarea is in focus AND we're mobile AND the keyboard is up
+    if (jsbin.mobile && window.matchMedia && window.matchMedia('(max-height: 410px) and (max-width: 640px)').matches) {
+      if (panel.editor) panel.editor.focus();
+    }
+
+    if (jsbin.mobile) {
+      panel.focus();
+      panel.trigger('show');
+      return;
+    }
+
     // update the splitter - but do it on the next tick
     // required to allow the splitter to see it's visible first
     setTimeout(function () {
@@ -281,7 +310,10 @@ Panel.prototype = {
         if (panel.virgin) {
           var top = panel.$el.find('.label').outerHeight();
           top += 8;
-          $(panel.editor.scroller).find('.CodeMirror-lines').css('padding-top', top);
+
+          if (!jsbin.mobile) {
+            $(panel.editor.scroller).find('.CodeMirror-lines').css('padding-top', top);
+          }
 
           populateEditor(panel, panel.name);
         }
@@ -305,16 +337,21 @@ Panel.prototype = {
       panel.trigger('show');
 
       panel.virgin = false;
-  }, 0);
+    }, 0);
 
     // TODO save which panels are visible in their profile - but check whether it's their code
   },
-  hide: function () {
+  hide: function (fromShow) {
     var panel = this;
     // panel.$el.hide();
     panel.visible = false;
     this.updateAriaState();
-    analytics.hidePanel(panel.id);
+
+    if (!fromShow) {
+      analytics.hidePanel(panel.id);
+    } else if (panel.editor) {
+      getRenderedCode[panel.id] = getRenderedCode.render(panel.id);
+    }
 
     // update all splitter positions
     // LOGIC: when you go to hide, you need to check if there's
@@ -337,22 +374,18 @@ Panel.prototype = {
       panel.$el.hide();
       panel.splitter.hide();
     }
-    // } else {
-    //   panel.$el.hide();
-    // }
+
+
     if (panel.editor) {
       panel.controlButton.toggleClass('hasContent', !!this.getCode().trim().length);
     }
 
     panel.controlButton.removeClass('active');
-    panel.distribute();
 
     if (panel.settings.hide) {
       panel.settings.hide.call(panel, true);
     }
 
-    // this.controlButton.show();
-    // setTimeout(function () {
     var visible = jsbin.panels.getVisible();
     if (visible.length) {
       jsbin.panels.focused = visible[0];
@@ -364,8 +397,22 @@ Panel.prototype = {
       jsbin.panels.focused.focus();
     }
 
-    $document.trigger('sizeeditors');
+    if (!fromShow && jsbin.mobile && visible.length === 0) {
+      $document.trigger('history:load');
+      $('#history').show();
+      setTimeout(function () {
+        $body.removeClass('panelsVisible');
+      }, 100); // 100 is on purpose to add to the effect of the reveal
+    }
+
     panel.trigger('hide');
+
+    if (fromShow) {
+      return;
+    }
+
+    panel.distribute();
+    $document.trigger('sizeeditors');
 
     // note: the history:open does first check whether there's an open panels
     // and if there are, it won't show the history, it'll just ignore the event
@@ -447,7 +494,7 @@ Panel.prototype = {
     // });
 
     // This prevents the browser from jumping
-    if (jsbin.mobile || jsbin.tablet || jsbin.embed) {
+    if (jsbin.embed) {
       editor._focus = editor.focus;
       editor.focus = function () {
         // console.log('ignoring manual call');

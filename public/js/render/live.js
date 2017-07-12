@@ -137,6 +137,11 @@ var renderer = (function () {
     if (!event.origin) return;
     var data = event.data;
 
+    if (typeof data !== 'string') {
+      // this event isn't for us (i.e. comes from a browser ext)
+      return;
+    }
+
     // specific change to handle reveal embedding
     try {
       if (event.data.indexOf('slide:') === 0 || event.data === 'jsbin:refresh') {
@@ -150,12 +155,30 @@ var renderer = (function () {
     } catch (e) {}
 
     try {
-      data = JSON.parse(event.data);
+      data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
     } catch (e) {
       return renderer.error('Error parsing event data:', e.message);
     }
+
+    if (data.type.indexOf('code:') === 0 && jsbin.embed) {
+      var panel = data.type.substr(5);
+      if (panel === 'js') { panel = 'javascript'; }
+      if (' css javascript html '.indexOf(' ' + panel + ' ') === -1) {
+        return renderer.error('No matching event handler:', data.type);
+      }
+
+      if (!jsbin.state.metadata.pro) {
+        return renderer.error('Code injection is only supported on pro created bins');
+      }
+
+      jsbin.panels.panels[panel].setCode(data.data);
+      renderLivePreview();
+
+      return;
+    }
+
     if (typeof renderer[data.type] !== 'function') {
-      return renderer.error('No matching event handler:', data.type);
+      return false; //renderer.error('No matching handler for event', data);
     }
     try {
       renderer[data.type](data.data);
@@ -323,7 +346,7 @@ var renderLivePreview = (function () {
   if (!$live.find('iframe').length) {
     iframe = document.createElement('iframe');
     iframe.setAttribute('class', 'stretch');
-    iframe.setAttribute('sandbox', 'allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts');
+    iframe.setAttribute('sandbox', 'allow-modals allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts');
     iframe.setAttribute('frameBorder', '0');
     iframe.setAttribute('name', '<proxy>');
     $live.prepend(iframe);
@@ -407,7 +430,7 @@ var renderLivePreview = (function () {
   return deferCallable(throttle(renderLivePreview, 200), function (done) {
     iframe.onload = function () {
       if (window.postMessage) {
-        // Setup postMessage listening to the runner
+        // setup postMessage listening to the runner
         $window.on('message', function (event) {
           renderer.handleMessage(event.originalEvent);
         });
